@@ -4,4 +4,4 @@ this is for visualiztion
 
 #### License
 
-mit
+mit# pills_visualization
