@@ -7,7 +7,10 @@ app_license = "mit"
 
 # Apps
 # ------------------
-
+override_whitelisted_methods = {
+    "pills_visualization.api.get_graph_data": "pills_visualization.api.get_graph_data",
+    "pills_visualization.api.get_charts_data": "pills_visualization.api.get_charts_data"
+}
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page

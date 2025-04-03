@@ -1,0 +1,224 @@
+{% extends "templates/web.html" %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/assets/pills_visualization/css/graph.css">
+
+<div class="container">
+    <!-- 10 Boxes (5 per row) -->
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/hospitals.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data1"></div>
+            <div class="title" id="title1">Hospitals</div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/bed.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data2"></div>
+            <div class="title" id="title2"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/admitted.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data3"></div>
+            <div class="title" id="title3"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/discharged.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data4"></div>
+            <div class="title" id="title4"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data5"></div>
+            <div class="title" id="title5"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data6"></div>
+            <div class="title" id="title6"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/0-4.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data7"></div>
+            <div class="title" id="title7"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/5-11.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data8"></div>
+            <div class="title" id="title8"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/12-18.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data9"></div>
+            <div class="title" id="title9"></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="icon"><img src="/assets/pills_visualization/images/above-18.png" alt=""></div>
+        <div class="content">
+            <div class="data" id="data10"></div>
+            <div class="title" id="title10"></div>
+        </div>
+    </div>
+
+     <!-- First Row: 2 Boxes for Graphs -->
+    <div class="chart-box">
+        <canvas id="chart1"></canvas>
+    </div>
+    <div class="chart-box">
+        <canvas id="chart2"></canvas>
+    </div>
+    <div class="chart-box">
+        <canvas id="chart3"></canvas>
+    </div>
+   
+    <div id="map" class="chart-box">
+
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // aggregate section
+$.ajax({
+    url: "/api/method/pills_visualization.api.get_graph_data",
+    success: function(response) {
+        if (response.message && Array.isArray(response.message)) {
+            response.message.forEach((item, index) => {
+                document.getElementById("data" + (item.index)).textContent = item.data;
+                document.getElementById("title" + (item.index)).textContent = item.title;
+            });
+        } else {
+            console.error("Invalid API response:", response);
+        }
+    },
+    error: function(xhr, status, error) {
+        console.error("AJAX error:", error);
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    let chartInstances = {}; // Store chart instances
+
+    function createChart(chartId, label, data, color) {
+        const ctx = document.getElementById(chartId);
+
+        if (chartInstances[chartId]) {
+            // Update existing chart data
+            chartInstances[chartId].data.labels = data.labels;
+            chartInstances[chartId].data.datasets[0].data = data.values;
+            chartInstances[chartId].update(); // Apply updates
+        } else {
+            // Create a new chart instance
+            chartInstances[chartId] = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: label,
+                        data: data.values,
+                        backgroundColor: color
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Patients" // Default Y-axis label
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function updateChartOptions(chartId, newYLabel) {
+        if (chartInstances[chartId]) {
+            chartInstances[chartId].options.scales.y.title.text = newYLabel;
+            chartInstances[chartId].update(); // Apply updates
+        }
+    }
+
+    function fetchChartData() {
+        frappe.call({
+            method: "pills_visualization.api.get_charts_data",
+            callback: function (response) {
+                if (response.message) {
+                    let admissionData = response.message.admission_reasons;
+                    let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
+                    let admission_reason_values = admissionData.map(item => item.admission_reasons_count);
+
+                    createChart("chart1", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values }, "#7B3791");
+
+                    let burn_cause_data = response.message.burn_cause;
+                    let burn_cause_labels = burn_cause_data.map(item => item.burn_cause);
+                    let burn_cause_values = burn_cause_data.map(item => item.burn_cause_count);
+
+                    createChart("chart2", "Burn Causes", { labels: burn_cause_labels, values: burn_cause_values }, "#7B3791");
+
+                    let patients_in_hospital_data = response.message.patients_in_hospital;
+                    let patients_in_hospital_labels = patients_in_hospital_data.map(item => item.hospital);
+                    let patients_in_hospital_values = patients_in_hospital_data.map(item => item.patients_in_hospital);
+
+                    createChart("chart3", "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#7B3791");
+
+                    // Map section
+                    
+
+                    var map = L.map('map').setView([30.3753, 69.3451], 5.2);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    var cityMarkers = {}; // Track markers by city
+
+                    response.message.hospitals_map_data.forEach(hospital => {
+                        if (!hospital.latitude || !hospital.longitude) {
+                            console.error("Missing coordinates for:", hospital);
+                            return;
+                        }
+
+                        // Ensure each city has only one marker
+                        if (!cityMarkers[hospital.city]) {
+                            let marker = L.marker([Number(hospital.latitude), Number(hospital.longitude)]).addTo(map);
+                            marker.bindPopup(`<b>${hospital.city}</b>`);
+                            cityMarkers[hospital.city] = marker;
+                        }
+                    });
+
+                }
+            }
+        });
+    }
+
+    fetchChartData();
+});
+
+
+
+</script>
+{% endblock %}
