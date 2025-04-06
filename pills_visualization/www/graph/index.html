@@ -2,8 +2,21 @@
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="/assets/pills_visualization/css/graph.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div class="filter-container">
+    <label for="from_date">From Date</label>
+    <input type="date" id="from_date" name="from_date">
+
+    <label for="to_date">To Date</label>
+    <input type="date" id="to_date" name="to_date">
+
+    <button id="apply_filters" type="button">Filter</button>
+</div>
 
 <div class="container">
+    
     <!-- 10 Boxes (5 per row) -->
     <div class="box">
         <div class="icon"><img src="/assets/pills_visualization/images/hospitals.png" alt=""></div>
@@ -98,26 +111,44 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // aggregate section
-$.ajax({
-    url: "/api/method/pills_visualization.api.get_graph_data",
-    success: function(response) {
-        if (response.message && Array.isArray(response.message)) {
-            response.message.forEach((item, index) => {
-                document.getElementById("data" + (item.index)).textContent = item.data;
-                document.getElementById("title" + (item.index)).textContent = item.title;
-            });
-        } else {
-            console.error("Invalid API response:", response);
-        }
-    },
-    error: function(xhr, status, error) {
-        console.error("AJAX error:", error);
-    }
-});
+$(document).ready(function () {
 
-document.addEventListener("DOMContentLoaded", function () {
+    flatpickr("#from_date", {
+        dateFormat: "d/m/Y",  // You can adjust the date format
+        allowInput: true,     // Allow users to type the date manually
+    });
+
+    flatpickr("#to_date", {
+        dateFormat: "d/m/Y",  // You can adjust the date format
+        allowInput: true,     // Allow users to type the date manually
+    });
+
+
     let chartInstances = {}; // Store chart instances
+    let map; // Store map instance
+
+    function fetchGraphData(filters = {}) {
+        $.ajax({
+            url: "/api/method/pills_visualization.api.get_dashboard_data", // Call the whitelisted method
+            data: filters, // Pass filters as query params
+            success: function (response) {
+                if (response.message && response.message.graph_data && Array.isArray(response.message.graph_data)) {
+                    response.message.graph_data.forEach((item) => {
+                        let dataElement = document.getElementById("data" + item.index);
+                        let titleElement = document.getElementById("title" + item.index);
+
+                        if (dataElement) dataElement.textContent = item.data;
+                        if (titleElement) titleElement.textContent = item.title;
+                    });
+                } else {
+                    console.error("Invalid API response:", response);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
+            }
+        });
+    }
 
     function createChart(chartId, label, data, color) {
         const ctx = document.getElementById(chartId);
@@ -126,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Update existing chart data
             chartInstances[chartId].data.labels = data.labels;
             chartInstances[chartId].data.datasets[0].data = data.values;
-            chartInstances[chartId].update(); // Apply updates
+            chartInstances[chartId].update();
         } else {
             // Create a new chart instance
             chartInstances[chartId] = new Chart(ctx, {
@@ -144,11 +175,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     maintainAspectRatio: false,
                     scales: {
                         y: {
+                            grid: {
+                                display: false
+                            },
                             title: {
                                 display: true,
                                 text: "Patients" // Default Y-axis label
                             },
                             beginAtZero: true
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
@@ -156,17 +195,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function updateChartOptions(chartId, newYLabel) {
-        if (chartInstances[chartId]) {
-            chartInstances[chartId].options.scales.y.title.text = newYLabel;
-            chartInstances[chartId].update(); // Apply updates
-        }
-    }
-
-    function fetchChartData() {
-        frappe.call({
-            method: "pills_visualization.api.get_charts_data",
-            callback: function (response) {
+    function fetchChartData(filters = {}) {
+        $.ajax({
+            url: "/api/method/pills_visualization.api.get_dashboard_data", // Call the whitelisted method
+            data: filters, // Pass filters to the API
+            success: function (response) {
                 if (response.message) {
                     let admissionData = response.message.admission_reasons;
                     let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
@@ -186,37 +219,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     createChart("chart3", "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#7B3791");
 
-                    // Map section
-                    
-
-                    var map = L.map('map').setView([30.3753, 69.3451], 5.2);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-
-                    var cityMarkers = {}; // Track markers by city
-
-                    response.message.hospitals_map_data.forEach(hospital => {
-                        if (!hospital.latitude || !hospital.longitude) {
-                            console.error("Missing coordinates for:", hospital);
-                            return;
-                        }
-
-                        // Ensure each city has only one marker
-                        if (!cityMarkers[hospital.city]) {
-                            let marker = L.marker([Number(hospital.latitude), Number(hospital.longitude)]).addTo(map);
-                            marker.bindPopup(`<b>${hospital.city}</b>`);
-                            cityMarkers[hospital.city] = marker;
-                        }
-                    });
-
+                    // Handle map section
+                    updateMap(response.message.hospitals_map_data);
                 }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", error);
             }
         });
     }
 
+    function updateMap(hospitals) {
+        if (!hospitals || !Array.isArray(hospitals)) return;
+
+        if (map) {
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+        } else {
+            map = L.map('map').setView([30.3753, 69.3451], 5.3);
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; Esri, OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        let cityMarkers = {}; // Track markers by city
+
+        hospitals.forEach(hospital => {
+            if (!hospital.latitude || !hospital.longitude) {
+                console.error("Missing coordinates for:", hospital);
+                return;
+            }
+
+            if (!cityMarkers[hospital.city]) {
+                let marker = L.marker([Number(hospital.latitude), Number(hospital.longitude)]).addTo(map);
+                marker.bindPopup(`<b>${hospital.city}</b>`);
+                cityMarkers[hospital.city] = marker;
+            }
+        });
+    }
+
+    function applyFilters() {
+        let fromDate = $("#from_date").val();
+        let toDate = $("#to_date").val();
+
+        let filters = {};
+        if (fromDate) filters.from_date = fromDate;
+        if (toDate) filters.to_date = toDate;
+
+        fetchGraphData(filters);
+        fetchChartData(filters);
+    }
+
+    // Initial data load
+    fetchGraphData();
     fetchChartData();
+
+    // Event listener for filter button
+    $("#apply_filters").click(function () {
+        applyFilters();
+    });
 });
+
 
 
 
