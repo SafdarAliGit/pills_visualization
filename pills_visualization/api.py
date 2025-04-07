@@ -84,45 +84,73 @@ def get_dashboard_data(from_date=None, to_date=None):
         "index": 6
     })
 
-    # Age Group Statistics
     zero_to_four_patients = frappe.db.sql("""
-        SELECT COUNT(*) as zero_to_four
-        FROM `tabBurn Admission Assessment`
-        WHERE TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 0 AND 4
-          AND (%s IS NULL OR date_of_hospital_admission >= %s)
-          AND (%s IS NULL OR date_of_hospital_admission <= %s)
-    """, (from_date, from_date, to_date, to_date), as_dict=True)
+    SELECT COUNT(*) AS zero_to_four
+    FROM `tabBurn Admission Assessment`
+    WHERE 
+        date_of_birth IS NOT NULL
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 0
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= 4
+        AND (%(from_date)s IS NULL OR date_of_hospital_admission >= %(from_date)s)
+        AND (%(to_date)s IS NULL OR date_of_hospital_admission <= %(to_date)s)
+    """, {
+        "from_date": from_date,
+        "to_date": to_date
+    }, as_dict=True)
+
+    count = zero_to_four_patients[0]["zero_to_four"] if zero_to_four_patients else 0
+
     data_list.append({
         "title": "0-4 Years",
-        "data": zero_to_four_patients[0]["zero_to_four"],
+        "data": count,
         "index": 7
     })
 
     five_to_eleven_patients = frappe.db.sql("""
-        SELECT COUNT(*) as five_to_eleven
-        FROM `tabBurn Admission Assessment`
-        WHERE TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 5 AND 11
-          AND (%s IS NULL OR date_of_hospital_admission >= %s)
-          AND (%s IS NULL OR date_of_hospital_admission <= %s)
-    """, (from_date, from_date, to_date, to_date), as_dict=True)
+    SELECT COUNT(*) AS five_to_eleven
+    FROM `tabBurn Admission Assessment`
+    WHERE 
+        date_of_birth IS NOT NULL
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 5
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= 11
+        AND (%(from_date)s IS NULL OR date_of_hospital_admission >= %(from_date)s)
+        AND (%(to_date)s IS NULL OR date_of_hospital_admission <= %(to_date)s)
+    """, {
+        "from_date": from_date,
+        "to_date": to_date
+    }, as_dict=True)
+
+    count = five_to_eleven_patients[0]["five_to_eleven"] if five_to_eleven_patients else 0
+
     data_list.append({
         "title": "5-11 Years",
-        "data": five_to_eleven_patients[0]["five_to_eleven"],
+        "data": count,
         "index": 8
     })
 
+
     twelve_to_eighteen_patients = frappe.db.sql("""
-        SELECT COUNT(*) as twelve_to_eighteen
-        FROM `tabBurn Admission Assessment`
-        WHERE TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 12 AND 18
-          AND (%s IS NULL OR date_of_hospital_admission >= %s)
-          AND (%s IS NULL OR date_of_hospital_admission <= %s)
-    """, (from_date, from_date, to_date, to_date), as_dict=True)
+    SELECT COUNT(*) AS twelve_to_eighteen
+    FROM `tabBurn Admission Assessment`
+    WHERE 
+        date_of_birth IS NOT NULL
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 12
+        AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= 18
+        AND (%(from_date)s IS NULL OR date_of_hospital_admission >= %(from_date)s)
+        AND (%(to_date)s IS NULL OR date_of_hospital_admission <= %(to_date)s)
+    """, {
+        "from_date": from_date,
+        "to_date": to_date
+    }, as_dict=True)
+
+    count = twelve_to_eighteen_patients[0]["twelve_to_eighteen"] if twelve_to_eighteen_patients else 0
+
     data_list.append({
         "title": "12-18 Years",
-        "data": twelve_to_eighteen_patients[0]["twelve_to_eighteen"],
+        "data": count,
         "index": 9
     })
+
 
     above_eighteen_patients = frappe.db.sql("""
         SELECT COUNT(*) as above_eighteen
