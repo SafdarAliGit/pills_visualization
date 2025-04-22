@@ -47,28 +47,28 @@
         </div>
     </div>
     <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt=""></div>
+        <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt="" style="height: 80px;"></div>
         <div class="content">
             <div class="data" id="data5"></div>
             <div class="title" id="title5"></div>
         </div>
     </div>
     <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt=""></div>
+        <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt="" style="height: 80px;"></div>
         <div class="content">
             <div class="data" id="data6"></div>
             <div class="title" id="title6"></div>
         </div>
     </div>
     <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/0-4.png" alt=""></div>
+        <div class="icon"><img src="/assets/pills_visualization/images/0-4.png" alt="" ></div>
         <div class="content">
             <div class="data" id="data7"></div>
             <div class="title" id="title7"></div>
         </div>
     </div>
     <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/5-11.png" alt=""></div>
+        <div class="icon"><img src="/assets/pills_visualization/images/5-11.png" alt="" ></div>
         <div class="content">
             <div class="data" id="data8"></div>
             <div class="title" id="title8"></div>
@@ -150,50 +150,57 @@ $(document).ready(function () {
         });
     }
 
-    function createChart(chartId, label, data, color) {
-        const ctx = document.getElementById(chartId);
+    function createChart(chartId, type, label, data, color, indexAxis = "x") {
+    const ctx = document.getElementById(chartId);
 
-        if (chartInstances[chartId]) {
-            // Update existing chart data
-            chartInstances[chartId].data.labels = data.labels;
-            chartInstances[chartId].data.datasets[0].data = data.values;
-            chartInstances[chartId].update();
-        } else {
-            // Create a new chart instance
-            chartInstances[chartId] = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: label,
-                        data: data.values,
-                        backgroundColor: color
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            grid: {
-                                display: false
-                            },
-                            title: {
-                                display: true,
-                                text: "Patients" // Default Y-axis label
-                            },
-                            beginAtZero: true
+    if (chartInstances[chartId]) {
+        // Update existing chart
+        chartInstances[chartId].config.type = type;
+        chartInstances[chartId].options.indexAxis = indexAxis;
+        chartInstances[chartId].data.labels = data.labels;
+        chartInstances[chartId].data.datasets[0].data = data.values;
+        chartInstances[chartId].data.datasets[0].label = label;
+        chartInstances[chartId].data.datasets[0].backgroundColor = color;
+        chartInstances[chartId].update();
+    } else {
+        // Create a new chart instance
+        chartInstances[chartId] = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: label,
+                    data: data.values,
+                    backgroundColor: color
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: indexAxis,
+                scales: {
+                    y: {
+                        grid: {
+                            display: false
                         },
-                        x: {
-                            grid: {
-                                display: false
-                            }
+                        title: {
+                            display: true,
+                            text: "Patients"
+                        },
+                        beginAtZero: true
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
-            });
-        }
+            }
+        });
     }
+}
+
+
 
     function fetchChartData(filters = {}) {
         $.ajax({
@@ -205,19 +212,19 @@ $(document).ready(function () {
                     let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
                     let admission_reason_values = admissionData.map(item => item.admission_reasons_count);
 
-                    createChart("chart1", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values }, "#7B3791");
+                    createChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values }, "#1974D2");
 
                     let burn_cause_data = response.message.burn_cause;
                     let burn_cause_labels = burn_cause_data.map(item => item.burn_cause);
                     let burn_cause_values = burn_cause_data.map(item => item.burn_cause_count);
 
-                    createChart("chart2", "Burn Causes", { labels: burn_cause_labels, values: burn_cause_values }, "#7B3791");
+                    createChart("chart2", "bar", "Burn Causes", { labels: burn_cause_labels, values: burn_cause_values }, "#1974D2", "y");
 
                     let patients_in_hospital_data = response.message.patients_in_hospital;
                     let patients_in_hospital_labels = patients_in_hospital_data.map(item => item.hospital);
                     let patients_in_hospital_values = patients_in_hospital_data.map(item => item.patients_in_hospital);
 
-                    createChart("chart3", "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#7B3791");
+                    createChart("chart3",'bar', "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#1974D2", "y");
 
                     // Handle map section
                     updateMap(response.message.hospitals_map_data);
@@ -230,36 +237,55 @@ $(document).ready(function () {
     }
 
     function updateMap(hospitals) {
-        if (!hospitals || !Array.isArray(hospitals)) return;
+    if (!hospitals || !Array.isArray(hospitals)) return;
 
-        if (map) {
-            map.eachLayer((layer) => {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
+    // Initialize map if not already done
+    if (!map) {
+        map = L.map('map').setView([30.3753, 69.3451], 5.3);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; Esri, OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ✅ Highlight Pakistan border
+        fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+            .then(res => res.json())
+            .then(data => {
+                const pakistan = data.features.find(f => f.properties.name === "Pakistan");
+                if (pakistan) {
+                    L.geoJSON(pakistan, {
+                        style: {
+                            color: "#ff0000",     // red border
+                            weight: 2,            // border thickness
+                            fillOpacity: 0        // transparent fill
+                        }
+                    }).addTo(map);
                 }
             });
-        } else {
-            map = L.map('map').setView([30.3753, 69.3451], 5.3);
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; Esri, OpenStreetMap contributors'
-            }).addTo(map);
+    }
+
+    // Remove old hospital markers
+    map.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
+
+    let cityMarkers = {}; // Track markers by city
+
+    hospitals.forEach(hospital => {
+        if (!hospital.latitude || !hospital.longitude) {
+            console.error("Missing coordinates for:", hospital);
+            return;
         }
 
-        let cityMarkers = {}; // Track markers by city
+        if (!cityMarkers[hospital.city]) {
+            let marker = L.marker([Number(hospital.latitude), Number(hospital.longitude)]).addTo(map);
+            marker.bindPopup(`<b>${hospital.city}</b>`);
+            cityMarkers[hospital.city] = marker;
+        }
+    });
+}
 
-        hospitals.forEach(hospital => {
-            if (!hospital.latitude || !hospital.longitude) {
-                console.error("Missing coordinates for:", hospital);
-                return;
-            }
-
-            if (!cityMarkers[hospital.city]) {
-                let marker = L.marker([Number(hospital.latitude), Number(hospital.longitude)]).addTo(map);
-                marker.bindPopup(`<b>${hospital.city}</b>`);
-                cityMarkers[hospital.city] = marker;
-            }
-        });
-    }
 
     function applyFilters() {
         let fromDate = $("#from_date").val();
@@ -287,4 +313,8 @@ $(document).ready(function () {
 
 
 </script>
+{% endblock %}
+
+{% block footer %}
+
 {% endblock %}

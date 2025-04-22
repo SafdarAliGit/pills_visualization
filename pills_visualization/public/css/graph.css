@@ -71,7 +71,7 @@
     max-width: calc(20% - 15px);
     height: 100px;
     padding: 5px;
-    background-color: #7a3590fc;
+    background-color: #1974D2;
     color: white;
 }
 
@@ -122,7 +122,7 @@
 
 /* Style the chart boxes */
 .chart-box {
-    border: 1.5px solid #7B3791;
+    border: 1.5px solid #1974D2;
     display: flex;
     justify-content: center;
     align-items: center;
