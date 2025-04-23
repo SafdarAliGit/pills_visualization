@@ -15,94 +15,107 @@
     <button id="apply_filters" type="button">Filter</button>
 </div>
 
-<div class="container">
+<div class="container box-container"  style="background-color: gainsboro;">
     
-    <!-- 10 Boxes (5 per row) -->
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/hospitals.png" alt=""></div>
-        <div class="content">
-            <div class="data" id="data1"></div>
-            <div class="title" id="title1">Hospitals</div>
+    <!-- 10 Boxes (4 per row) -->
+     <div class="outer-box">
+    <div class="title">General Stats</div>
+    <div class="inner-content">
+        <div class="box" style="background-color: #50a0f0;">
+            <div class="icon"><img src="/assets/pills_visualization/images/hospitals.png" alt=""></div>
+            <div class="content">
+                <div class="title" id="title1"></div>
+                <div class="data" id="data1"></div>
+                
+            </div>
+        </div>
+        <div class="box" style="background-color: #50a0f0;">
+            <div class="icon"><img src="/assets/pills_visualization/images/bed.png" alt=""></div>
+            <div class="content">
+                <div class="title" id="title2"></div>
+                <div class="data" id="data2"></div>
+            </div>
+        </div>
+        <div class="box" style="background-color: #50a0f0;">
+            <div class="icon"><img src="/assets/pills_visualization/images/admitted.png" alt=""></div>
+            <div class="content">
+                <div class="title" id="title3"></div>
+                <div class="data" id="data3"></div>
+            </div>
+        </div>
+        <div class="box" style="background-color: #50a0f0;">
+            <div class="icon"><img src="/assets/pills_visualization/images/discharged.png" alt=""></div>
+            <div class="content">
+                <div class="title" id="title4"></div>
+                <div class="data" id="data4"></div>
+            </div>
         </div>
     </div>
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/bed.png" alt=""></div>
-        <div class="content">
-            <div class="data" id="data2"></div>
-            <div class="title" id="title2"></div>
-        </div>
-    </div>
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/admitted.png" alt=""></div>
-        <div class="content">
-            <div class="data" id="data3"></div>
-            <div class="title" id="title3"></div>
-        </div>
-    </div>
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/discharged.png" alt=""></div>
-        <div class="content">
-            <div class="data" id="data4"></div>
-            <div class="title" id="title4"></div>
-        </div>
-    </div>
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt="" style="height: 80px;"></div>
-        <div class="content">
-            <div class="data" id="data5"></div>
-            <div class="title" id="title5"></div>
-        </div>
-    </div>
-    <div class="box">
-        <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt="" style="height: 80px;"></div>
-        <div class="content">
-            <div class="data" id="data6"></div>
-            <div class="title" id="title6"></div>
-        </div>
-    </div>
-    <div class="box">
+</div>
+
+<div class="outer-box" style="background-color: #278df3;">  
+    <div class="title">Age Groups</div>
+    <div class="inner-content">
+    <div class="box" style="background-color: #278df3;">
         <div class="icon"><img src="/assets/pills_visualization/images/0-4.png" alt="" ></div>
         <div class="content">
-            <div class="data" id="data7"></div>
             <div class="title" id="title7"></div>
+            <div class="data" id="data7"></div>
+  
         </div>
     </div>
-    <div class="box">
+    <div class="box" style="background-color: #278df3;">
         <div class="icon"><img src="/assets/pills_visualization/images/5-11.png" alt="" ></div>
         <div class="content">
-            <div class="data" id="data8"></div>
             <div class="title" id="title8"></div>
+            <div class="data" id="data8"></div>
         </div>
     </div>
-    <div class="box">
+    <div class="box" style="background-color: #278df3;">
         <div class="icon"><img src="/assets/pills_visualization/images/12-18.png" alt=""></div>
         <div class="content">
-            <div class="data" id="data9"></div>
             <div class="title" id="title9"></div>
+            <div class="data" id="data9"></div>
         </div>
     </div>
-    <div class="box">
+    <div class="box" style="background-color: #278df3;">
         <div class="icon"><img src="/assets/pills_visualization/images/above-18.png" alt=""></div>
         <div class="content">
-            <div class="data" id="data10"></div>
             <div class="title" id="title10"></div>
+            <div class="data" id="data10"></div>
         </div>
     </div>
+  
+</div>
+</div>
 
-     <!-- First Row: 2 Boxes for Graphs -->
-    <div class="chart-box">
-        <canvas id="chart1"></canvas>
-    </div>
-    <div class="chart-box">
-        <canvas id="chart2"></canvas>
-    </div>
-    <div class="chart-box">
-        <canvas id="chart3"></canvas>
-    </div>
-   
-    <div id="map" class="chart-box">
+<div class="outer-box" style="background-color: #1974D2;">
+    <div class="title">Gender Groups</div>
+    <div class="inner-content">
+        <div class="box" style="background-color: #1974D2;">
+            <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt="" style="height: 80px;"></div>
+            <div class="content">
+                <div class="title" id="title5"></div>
+                <div class="data" id="data5"></div>
+            </div>
+        </div>
+        <div class="box" style="background-color: #1974D2;">
+            <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt="" style="height: 80px;"></div>
+            <div class="content">
+                <div class="title" id="title6"></div>
+                <div class="data" id="data6"></div>
+            </div>
+        </div>
+</div>
+</div>
+     <!-- Chart Boxes (4 items) -->
+<div class="chart-container">
+    <div class="chart-box"><canvas id="chart1"></canvas></div>
+    <div class="chart-box"><canvas id="chart2"></canvas></div>
+    <div class="chart-box"><canvas id="chart3"></canvas></div>
+    <div class="chart-box" id="map"></div>
+</div>
 
-    </div>
 </div>
 
 
