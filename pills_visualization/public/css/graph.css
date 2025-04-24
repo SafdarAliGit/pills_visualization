@@ -186,7 +186,7 @@
     flex-wrap: wrap;
     gap: 15px;
     width: 100%;
-    margin-top: 10px; /* Adds spacing from top section */
+    /* margin-top: 10px;  */
 }
 
 /* Style the chart boxes */
