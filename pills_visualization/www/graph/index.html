@@ -123,7 +123,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
 <script>
+
 $(document).ready(function () {
 
     flatpickr("#from_date", {
@@ -162,14 +165,69 @@ $(document).ready(function () {
             }
         });
     }
-
     function createChart(chartId, type, label, data, color, indexAxis = "x") {
     const ctx = document.getElementById(chartId);
+
+    // Define the base options
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: indexAxis,
+        scales: {
+            y: {
+                grid: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Patients"
+                },
+                beginAtZero: true
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        },
+        plugins: {}
+    };
+
+    // Add custom tooltip and datalabels for pie charts
+    if (type === 'pie') {
+        options.plugins.tooltip = {
+            callbacks: {
+                label: function(context) {
+                    const dataset = context.dataset;
+                    const total = dataset.data.reduce((acc, val) => acc + val, 0);
+                    const currentValue = dataset.data[context.dataIndex];
+                    const percentage = ((currentValue / total) * 100).toFixed(2);
+                    return `${context.label}: ${percentage}%`;
+                }
+            }
+        };
+
+        options.plugins.datalabels = {
+            formatter: (value, context) => {
+                const dataArray = context.chart.data.datasets[0].data;
+                const total = dataArray.reduce((acc, val) => acc + val, 0);
+                const percentage = ((value / total) * 100).toFixed(2) + '%';
+                return percentage;
+            },
+            color: '#fff',
+            font: {
+                weight: 'bold'
+            }
+        };
+
+        // Pie charts do not use scales
+        delete options.scales;
+    }
 
     if (chartInstances[chartId]) {
         // Update existing chart
         chartInstances[chartId].config.type = type;
-        chartInstances[chartId].options.indexAxis = indexAxis;
+        chartInstances[chartId].options = options;
         chartInstances[chartId].data.labels = data.labels;
         chartInstances[chartId].data.datasets[0].data = data.values;
         chartInstances[chartId].data.datasets[0].label = label;
@@ -187,28 +245,8 @@ $(document).ready(function () {
                     backgroundColor: color
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: indexAxis,
-                scales: {
-                    y: {
-                        grid: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: "Patients"
-                        },
-                        beginAtZero: true
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
+            options: options,
+            plugins: [ChartDataLabels]
         });
     }
 }
@@ -225,7 +263,7 @@ $(document).ready(function () {
                     let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
                     let admission_reason_values = admissionData.map(item => item.admission_reasons_count);
 
-                    createChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values }, "#1974D2");
+                    createChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values },);
 
                     let burn_cause_data = response.message.burn_cause;
                     let burn_cause_labels = burn_cause_data.map(item => item.burn_cause);
