@@ -186,6 +186,7 @@ def get_dashboard_data(from_date=None, to_date=None):
         WHERE (%s IS NULL OR date_of_hospital_admission >= %s)
           AND (%s IS NULL OR date_of_hospital_admission <= %s)
         GROUP BY burn_cause
+        ORDER BY burn_cause_count DESC
     """, (from_date, from_date, to_date, to_date), as_dict=True)
     data["burn_cause"] = burn_cause
 
@@ -197,6 +198,7 @@ def get_dashboard_data(from_date=None, to_date=None):
           AND (%s IS NULL OR date_of_hospital_admission >= %s)
           AND (%s IS NULL OR date_of_hospital_admission <= %s)
         GROUP BY hospital
+        ORDER BY patients_in_hospital DESC
     """, (from_date, from_date, to_date, to_date), as_dict=True)
     data["patients_in_hospital"] = patients_in_hospital
 

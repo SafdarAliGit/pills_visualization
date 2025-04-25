@@ -224,6 +224,17 @@ $(document).ready(function () {
         delete options.scales;
     }
 
+    // 🔥 Add datalabels customization for bar charts
+    if (type === 'bar') {
+        options.plugins.datalabels = {
+            color: '#fff',
+            font: {
+                weight: 'bold',
+                size: 14
+            }
+        };
+    }
+
     if (chartInstances[chartId]) {
         // Update existing chart
         chartInstances[chartId].config.type = type;
@@ -250,8 +261,6 @@ $(document).ready(function () {
         });
     }
 }
-
-
 
     function fetchChartData(filters = {}) {
         $.ajax({
