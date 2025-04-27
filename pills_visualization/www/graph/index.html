@@ -165,7 +165,7 @@ $(document).ready(function () {
             }
         });
     }
-    function createChart(chartId, type, label, data, color, indexAxis = "x") {
+    function createPieChart(chartId, type, label, data, color, indexAxis = "x") {
     const ctx = document.getElementById(chartId);
 
     // Define the base options
@@ -180,7 +180,7 @@ $(document).ready(function () {
                 },
                 title: {
                     display: true,
-                    text: "Patients"
+                    // text: "Patients"
                 },
                 beginAtZero: true
             },
@@ -190,7 +190,124 @@ $(document).ready(function () {
                 }
             }
         },
-        plugins: {}
+        plugins: {
+    legend: {
+      labels: {
+        generateLabels: (chart) => {
+          return chart.data.labels.map((label, index) => {
+            const dataset = chart.data.datasets[0];
+            const value = dataset.data[index];
+            const percentage = ((value / dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(2);
+            return {
+              text: `${label}: ${value} (${percentage}%)`,
+              fillStyle: dataset.backgroundColor[index],
+              hidden: false
+            };
+          });
+        }
+      }
+    }
+  }
+    };
+
+    // Add custom tooltip and datalabels for pie charts
+    if (type === 'pie') {
+        options.plugins.tooltip = {
+            callbacks: {
+                label: function(context) {
+                    const dataset = context.dataset;
+                    const total = dataset.data.reduce((acc, val) => acc + val, 0);
+                    const currentValue = dataset.data[context.dataIndex];
+                    const percentage = ((currentValue / total) * 100).toFixed(2);
+                    return `${context.label}: ${percentage}%`;
+                }
+            }
+        };
+
+        options.plugins.datalabels = {
+            // formatter: (value, context) => {
+            //     const dataArray = context.chart.data.datasets[0].data;
+            //     const total = dataArray.reduce((acc, val) => acc + val, 0);
+            //     const percentage = ((value / total) * 100).toFixed(2) + '%';
+            //     return percentage;
+            // },
+            // color: '#000',
+            // font: {
+            //     weight: 'bold'
+            // }
+        };
+
+        // Pie charts do not use scales
+        delete options.scales;
+    }
+
+    // 🔥 Add datalabels customization for bar charts
+    if (type === 'bar') {
+        options.plugins.datalabels = {
+            color: '#000',
+            font: {
+                weight: 'bold',
+                size: 14
+            }
+        };
+    }
+
+    if (chartInstances[chartId]) {
+        // Update existing chart
+        chartInstances[chartId].config.type = type;
+        chartInstances[chartId].options = options;
+        chartInstances[chartId].data.labels = data.labels;
+        chartInstances[chartId].data.datasets[0].data = data.values;
+        chartInstances[chartId].data.datasets[0].label = label;
+        chartInstances[chartId].data.datasets[0].backgroundColor = color;
+        chartInstances[chartId].update();
+    } else {
+        // Create a new chart instance
+        chartInstances[chartId] = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: label,
+                    data: data.values,
+                    backgroundColor: color
+                }]
+            },
+            options: options,
+            plugins: [ChartDataLabels]
+        });
+    }
+}
+function createBarChart(chartId, type, label, data, color, indexAxis = "x") {
+    const ctx = document.getElementById(chartId);
+
+    // Define the base options
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: indexAxis,
+        scales: {
+            y: {
+                grid: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    // text: "Patients"
+                },
+                beginAtZero: true
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        },
+        plugins: {
+    legend: {
+      
+    }
+  }
     };
 
     // Add custom tooltip and datalabels for pie charts
@@ -214,7 +331,7 @@ $(document).ready(function () {
                 const percentage = ((value / total) * 100).toFixed(2) + '%';
                 return percentage;
             },
-            color: '#fff',
+            color: '#000',
             font: {
                 weight: 'bold'
             }
@@ -227,7 +344,7 @@ $(document).ready(function () {
     // 🔥 Add datalabels customization for bar charts
     if (type === 'bar') {
         options.plugins.datalabels = {
-            color: '#fff',
+            color: '#000',
             font: {
                 weight: 'bold',
                 size: 14
@@ -272,19 +389,19 @@ $(document).ready(function () {
                     let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
                     let admission_reason_values = admissionData.map(item => item.admission_reasons_count);
 
-                    createChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values },);
+                    createPieChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values },);
 
                     let burn_cause_data = response.message.burn_cause;
                     let burn_cause_labels = burn_cause_data.map(item => item.burn_cause);
                     let burn_cause_values = burn_cause_data.map(item => item.burn_cause_count);
 
-                    createChart("chart2", "bar", "Burn Causes", { labels: burn_cause_labels, values: burn_cause_values }, "#1974D2", "y");
+                    createBarChart("chart2", "bar", "Burn Causes", { labels: burn_cause_labels, values: burn_cause_values }, "#1974D2", "y");
 
                     let patients_in_hospital_data = response.message.patients_in_hospital;
                     let patients_in_hospital_labels = patients_in_hospital_data.map(item => item.hospital);
                     let patients_in_hospital_values = patients_in_hospital_data.map(item => item.patients_in_hospital);
 
-                    createChart("chart3",'bar', "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#1974D2", "y");
+                    createBarChart("chart3",'bar', "Patients in Hospital", { labels: patients_in_hospital_labels, values: patients_in_hospital_values }, "#1974D2", "y");
 
                     // Handle map section
                     updateMap(response.message.hospitals_map_data);
