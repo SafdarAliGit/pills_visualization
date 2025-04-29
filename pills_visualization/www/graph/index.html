@@ -21,7 +21,7 @@
      <div class="outer-box">
     <div class="title" style="color: rgb(240, 234, 234);">GENERAL STATS</div>
     <div class="inner-content">
-        <div class="box" style="background-color: #50a0f0;">
+        <div class="box" style="background-color: #6db0f2;">
             <div class="icon"><img src="/assets/pills_visualization/images/hospitals.png" alt=""></div>
             <div class="content">
                 <div class="title" id="title1"></div>
@@ -29,21 +29,21 @@
                 
             </div>
         </div>
-        <div class="box" style="background-color: #50a0f0;">
+        <div class="box" style="background-color: #6db0f2;">
             <div class="icon"><img src="/assets/pills_visualization/images/bed.png" alt=""></div>
             <div class="content">
                 <div class="title" id="title2"></div>
                 <div class="data" id="data2"></div>
             </div>
         </div>
-        <div class="box" style="background-color: #50a0f0;">
+        <div class="box" style="background-color: #6db0f2;">
             <div class="icon"><img src="/assets/pills_visualization/images/admitted.png" alt=""></div>
             <div class="content">
                 <div class="title" id="title3"></div>
                 <div class="data" id="data3"></div>
             </div>
         </div>
-        <div class="box" style="background-color: #50a0f0;">
+        <div class="box" style="background-color: #6db0f2;">
             <div class="icon"><img src="/assets/pills_visualization/images/discharged.png" alt=""></div>
             <div class="content">
                 <div class="title" id="title4"></div>
@@ -53,10 +53,10 @@
     </div>
 </div>
 
-<div class="outer-box" style="background-color: #278df3;">  
+<div class="outer-box" style="background-color: #6db0f2;">  
     <div class="title" style="color:  rgb(240, 234, 234);">AGE GROUPS</div>
     <div class="inner-content">
-    <div class="box" style="background-color: #278df3;">
+    <div class="box" style="background-color: #6db0f2;">
         <div class="icon"><img src="/assets/pills_visualization/images/0-4.png" alt="" ></div>
         <div class="content">
             <div class="title" id="title7"></div>
@@ -64,21 +64,21 @@
   
         </div>
     </div>
-    <div class="box" style="background-color: #278df3;">
+    <div class="box" style="background-color: #6db0f2;">
         <div class="icon"><img src="/assets/pills_visualization/images/5-11.png" alt="" ></div>
         <div class="content">
             <div class="title" id="title8"></div>
             <div class="data" id="data8"></div>
         </div>
     </div>
-    <div class="box" style="background-color: #278df3;">
+    <div class="box" style="background-color: #6db0f2;">
         <div class="icon"><img src="/assets/pills_visualization/images/12-18.png" alt=""></div>
         <div class="content">
             <div class="title" id="title9"></div>
             <div class="data" id="data9"></div>
         </div>
     </div>
-    <div class="box" style="background-color: #278df3;">
+    <div class="box" style="background-color: #6db0f2;">
         <div class="icon"><img src="/assets/pills_visualization/images/above-18.png" alt=""></div>
         <div class="content">
             <div class="title" id="title10"></div>
@@ -89,17 +89,17 @@
 </div>
 </div>
 
-<div class="outer-box" style="background-color: #1974D2;width: calc(50% - 5px);margin: 0 auto;">
+<div class="outer-box" style="background-color: #6db0f2;width: calc(50% - 5px);margin: 0 auto;">
     <div class="title" style="color:  rgb(240, 234, 234);">GENDER GROUPS</div>
     <div class="inner-content">
-        <div class="box" style="background-color: #1974D2;max-width: calc(50% - 15px);">
+        <div class="box" style="background-color: #6db0f2;max-width: calc(50% - 15px);">
             <div class="icon"><img src="/assets/pills_visualization/images/male.png" alt="" style="height: 80px;"></div>
             <div class="content">
                 <div class="title" id="title5"></div>
                 <div class="data" id="data5"></div>
             </div>
         </div>
-        <div class="box" style="background-color: #1974D2;max-width: calc(50% - 15px);">
+        <div class="box" style="background-color: #6db0f2;max-width: calc(50% - 15px);">
             <div class="icon"><img src="/assets/pills_visualization/images/female.png" alt="" style="height: 80px;"></div>
             <div class="content">
                 <div class="title" id="title6"></div>
@@ -192,7 +192,8 @@ $(document).ready(function () {
         },
         plugins: {
     legend: {
-      labels: {
+        position: "left",
+        labels: {
         generateLabels: (chart) => {
           return chart.data.labels.map((label, index) => {
             const dataset = chart.data.datasets[0];
