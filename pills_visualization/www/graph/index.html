@@ -397,7 +397,7 @@ function createBarChart(chartId, type, label, data, color, indexAxis = "x") {
                     let admission_reason_labels = admissionData.map(item => item.how_was_the_burn_caused);
                     let admission_reason_values = admissionData.map(item => item.admission_reasons_count);
 
-                    createPieChart("chart1", "pie", "Admission Reasons", { labels: admission_reason_labels, values: admission_reason_values },);
+                    createPieChart("chart1", "pie", "How Did The Burn Occurred", { labels: admission_reason_labels, values: admission_reason_values },);
 
                     let burn_cause_data = response.message.burn_cause;
                     let burn_cause_labels = burn_cause_data.map(item => item.burn_cause);
